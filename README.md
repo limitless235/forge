@@ -10,9 +10,9 @@ FORGE is a silent inference-time quality loop for AI coding tools. It intercepts
 
 ```
 packages/
-├── core/     @forge/core   — Loop engine, types, scoring
+├── core/     @forge/core   — Loop engine, types, scoring, multi-provider LLM
 ├── rewards/  @forge/rewards — Built-in reward functions
-└── mcp/      @forge/mcp    — MCP server + CLI
+└── mcp/      @forge/mcp    — MCP server + CLI + watch daemon
 ```
 
 ## Quick Start
@@ -20,7 +20,7 @@ packages/
 ### Prerequisites
 
 - Node.js 20+
-- `ANTHROPIC_API_KEY` environment variable
+- An API key for your chosen LLM provider (see below)
 
 ### Install
 
@@ -35,13 +35,13 @@ npm run build
 npx forge init
 ```
 
-### Register MCP server
-
-**Cursor:**
+### Register MCP server (auto-enforces via Cursor rules)
 
 ```bash
 npx forge install --cursor
 ```
+
+This registers the MCP server in `.cursor/mcp.json`, writes `.cursor/rules/forge.mdc` with `alwaysApply: true`, and passes your API key env var to the MCP process.
 
 **Claude Code:**
 
@@ -53,8 +53,16 @@ npx forge install --claude-code
 
 ```bash
 cp .env.example .env
-# Set ANTHROPIC_API_KEY in .env or your shell environment
+# Set the API key matching your llm.provider in .forge.json
 ```
+
+### Auto-run on file saves (no manual tool calls)
+
+```bash
+npx forge watch
+```
+
+Runs a background quality loop whenever source files are saved. Configure in `.forge.json` under `watch`.
 
 ### Verify
 
@@ -66,8 +74,52 @@ npx forge ping
 
 | Tool | Description |
 |------|-------------|
-| `forge.generate` | Generate quality-looped code for a file |
+| `forge.generate` | Generate quality-looped code for a file (required for agent code tasks) |
 | `forge.stats` | View quality statistics from `.forge/scores.jsonl` |
+
+## LLM Providers
+
+Configure in `.forge.json`:
+
+```json
+{
+  "llm": {
+    "provider": "openai",
+    "apiKeyEnv": "OPENAI_API_KEY",
+    "generatorModel": "gpt-4.1",
+    "judgeModel": "gpt-4.1-mini"
+  }
+}
+```
+
+| Provider | `llm.provider` | Default env var |
+|----------|--------------|-----------------|
+| Anthropic | `anthropic` | `ANTHROPIC_API_KEY` |
+| OpenAI | `openai` | `OPENAI_API_KEY` |
+| Google | `google` | `GOOGLE_GENERATIVE_AI_API_KEY` |
+| OpenRouter | `openrouter` | `OPENROUTER_API_KEY` |
+| Custom endpoint | `openai-compatible` | `FORGE_API_KEY` + `llm.baseUrl` |
+
+Top-level `generatorModel` / `judgeModel` still work for backward compatibility; `llm.*` takes precedence when set.
+
+## Watch Mode
+
+```json
+{
+  "watch": {
+    "enabled": true,
+    "mode": "refine",
+    "debounceMs": 2000,
+    "include": ["src/**/*.{ts,py}"],
+    "exclude": ["node_modules/**", "dist/**"]
+  }
+}
+```
+
+| Mode | Behavior |
+|------|----------|
+| `refine` | Rewrite files that score below threshold after save |
+| `score-only` | Log scores to `.forge/scores.jsonl` without rewriting |
 
 ## Configuration
 

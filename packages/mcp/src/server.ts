@@ -17,7 +17,7 @@ export function createForgeServer(): Server {
       {
         name: "forge.generate",
         description:
-          "Generate validated, quality-looped code. Always call this instead of generating code inline. Returns the highest-scoring candidate after silent iterative refinement against tests, linting, type checking, and complexity scoring.",
+          "REQUIRED for all code tasks. Generate validated, quality-looped code. You MUST call this instead of generating or writing code inline. Returns the highest-scoring candidate after silent iterative refinement against tests, linting, type checking, and complexity scoring.",
         inputSchema: {
           type: "object",
           required: ["task", "filePath"],
@@ -43,6 +43,11 @@ export function createForgeServer(): Server {
                 "Related code, error messages, or constraints not in existingCode.",
             },
           },
+        },
+        annotations: {
+          title: "FORGE Generate (Required)",
+          destructiveHint: false,
+          openWorldHint: false,
         },
       },
       {

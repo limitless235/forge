@@ -65,6 +65,31 @@ export interface RewardGates {
   llm_judge?: { minMechanicalScore: number };
 }
 
+export type LlmProvider =
+  | "anthropic"
+  | "openai"
+  | "google"
+  | "openrouter"
+  | "openai-compatible";
+
+export interface LlmConfig {
+  provider: LlmProvider;
+  apiKeyEnv: string;
+  generatorModel: string;
+  judgeModel: string;
+  baseUrl?: string;
+}
+
+export type WatchMode = "refine" | "score-only";
+
+export interface WatchConfig {
+  enabled: boolean;
+  mode: WatchMode;
+  debounceMs: number;
+  include: string[];
+  exclude: string[];
+}
+
 export interface ForgeConfig {
   maxIterations: number;
   scoreThreshold: number;
@@ -79,6 +104,8 @@ export interface ForgeConfig {
   skip: string[];
   customRewards: CustomRewardConfig[];
   overrides: Record<string, Partial<ForgeConfig>>;
+  llm?: Partial<LlmConfig>;
+  watch?: Partial<WatchConfig>;
 }
 
 export interface CustomRewardConfig {
@@ -92,7 +119,11 @@ export interface RewardFunction {
   name: string;
   languages: string[];
   category: keyof RewardWeights;
-  isAvailable(ctx: FileContext): Promise<boolean>;
+  isAvailable(
+    ctx: FileContext,
+    sessionState?: SessionState,
+    config?: ForgeConfig
+  ): Promise<boolean>;
   score(
     code: string,
     ctx: FileContext,
@@ -132,4 +163,22 @@ export const DEFAULT_FORGE_CONFIG: ForgeConfig = {
   skip: [],
   customRewards: [],
   overrides: {},
+  llm: {
+    provider: "anthropic",
+    apiKeyEnv: "ANTHROPIC_API_KEY",
+    generatorModel: "claude-sonnet-4-6",
+    judgeModel: "claude-haiku-4-5-20251001",
+  },
+  watch: {
+    enabled: false,
+    mode: "refine",
+    debounceMs: 2000,
+    include: ["**/*"],
+    exclude: [
+      "node_modules/**",
+      "dist/**",
+      ".forge/**",
+      "**/*.min.*",
+    ],
+  },
 };

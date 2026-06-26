@@ -1,7 +1,7 @@
-import { createAnthropic } from "@ai-sdk/anthropic";
 import { generateText } from "ai";
 import type { ForgeConfig } from "./types.js";
 import { buildGenerationPrompt } from "./feedback.js";
+import { createLanguageModel, resolveLlmConfig } from "./llm.js";
 
 export async function generateCandidates(
   basePrompt: string,
@@ -11,10 +11,11 @@ export async function generateCandidates(
 ): Promise<string> {
   const prompt = buildGenerationPrompt(basePrompt, previousFeedback);
   const count = Math.max(1, config.parallelCandidates);
+  const { generatorModel } = resolveLlmConfig(config);
 
   const results = await Promise.all(
     Array.from({ length: count }, () =>
-      generateSingle(prompt, config.generatorModel)
+      generateSingle(prompt, config, generatorModel)
     )
   );
 
@@ -24,18 +25,13 @@ export async function generateCandidates(
 
 async function generateSingle(
   prompt: string,
-  model: string
+  config: ForgeConfig,
+  modelId: string
 ): Promise<string> {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error("ANTHROPIC_API_KEY is required for code generation");
-  }
-
-  const anthropic = createAnthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-  });
+  const model = createLanguageModel(config, modelId);
 
   const { text } = await generateText({
-    model: anthropic(model),
+    model,
     prompt,
     maxTokens: 8192,
   });

@@ -20,5 +20,18 @@
   },
   "skip": [],
   "customRewards": [],
-  "overrides": {}
+  "overrides": {},
+  "llm": {
+    "provider": "anthropic",
+    "apiKeyEnv": "ANTHROPIC_API_KEY",
+    "generatorModel": "claude-sonnet-4-6",
+    "judgeModel": "claude-haiku-4-5-20251001"
+  },
+  "watch": {
+    "enabled": false,
+    "mode": "refine",
+    "debounceMs": 2000,
+    "include": ["**/*.{ts,tsx,js,jsx,py,rs}"],
+    "exclude": ["node_modules/**", "dist/**", ".forge/**", "**/*.min.*"]
+  }
 }

@@ -32,7 +32,9 @@ export class RewardRegistry {
     const available: PreparedReward[] = [];
 
     for (const fn of candidates) {
-      const isAvailable = await fn.isAvailable(ctx).catch(() => false);
+      const isAvailable = await fn
+        .isAvailable(ctx, undefined, config)
+        .catch(() => false);
       if (isAvailable) {
         available.push({
           fn,

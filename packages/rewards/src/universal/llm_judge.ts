@@ -1,7 +1,11 @@
-import { createAnthropic } from "@ai-sdk/anthropic";
 import { generateObject } from "ai";
 import { z } from "zod";
 import type { FileContext, ForgeConfig, RewardFunction } from "@forge/core";
+import {
+  createLanguageModel,
+  isLlmAvailable,
+  resolveLlmConfig,
+} from "@forge/core";
 import { makeScore } from "../base.js";
 
 const judgeSchema = z.object({
@@ -15,31 +19,33 @@ export function createLlmJudgeScorer(task: string): RewardFunction {
     languages: ["python", "typescript", "javascript", "rust"],
     category: "llm_judge",
 
-    async isAvailable(): Promise<boolean> {
-      return Boolean(process.env.ANTHROPIC_API_KEY);
+    async isAvailable(_ctx, _session, config?: ForgeConfig) {
+      if (!config) return false;
+      return isLlmAvailable(config);
     },
 
     async score(code: string, _ctx: FileContext, _session, config?: ForgeConfig) {
       const start = Date.now();
-      const judgeModel =
-        config?.judgeModel ?? "claude-haiku-4-5-20251001";
 
-      if (!process.env.ANTHROPIC_API_KEY) {
+      if (!config || !isLlmAvailable(config)) {
+        const apiKeyEnv = config
+          ? resolveLlmConfig(config).apiKeyEnv
+          : "ANTHROPIC_API_KEY";
         return makeScore(
           "llm_judge",
           0.5,
-          "ANTHROPIC_API_KEY not set",
+          `${apiKeyEnv} not set`,
           Date.now() - start
         );
       }
 
+      const { judgeModel } = resolveLlmConfig(config);
+
       try {
-        const anthropic = createAnthropic({
-          apiKey: process.env.ANTHROPIC_API_KEY,
-        });
+        const model = createLanguageModel(config, judgeModel);
 
         const { object } = await generateObject({
-          model: anthropic(judgeModel),
+          model,
           schema: judgeSchema,
           prompt: `You are a code quality judge. Developer asked for:
 ${task}
