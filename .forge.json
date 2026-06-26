@@ -1,0 +1,24 @@
+{
+  "$schema": "https://forgecode.dev/schema/v1.json",
+  "maxIterations": 4,
+  "scoreThreshold": 0.82,
+  "parallelCandidates": 1,
+  "generatorModel": "claude-sonnet-4-6",
+  "judgeModel": "claude-haiku-4-5-20251001",
+  "silent": true,
+  "logScores": true,
+  "reportFailures": false,
+  "rewards": {
+    "tests": 0.45,
+    "linter": 0.2,
+    "types": 0.2,
+    "complexity": 0.1,
+    "llm_judge": 0.05
+  },
+  "rewardGates": {
+    "llm_judge": { "minMechanicalScore": 0.5 }
+  },
+  "skip": [],
+  "customRewards": [],
+  "overrides": {}
+}

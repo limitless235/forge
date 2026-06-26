@@ -1,0 +1,33 @@
+{
+  "name": "@forge/mcp",
+  "version": "0.1.0",
+  "description": "FORGE MCP server and CLI",
+  "type": "module",
+  "bin": {
+    "forge-mcp": "./dist/index.js",
+    "forge": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@forge/core": "0.1.0",
+    "@forge/rewards": "0.1.0",
+    "@modelcontextprotocol/sdk": "^1.13.2",
+    "minimatch": "^10.0.3"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "@types/minimatch": "^5.1.2"
+  }
+}

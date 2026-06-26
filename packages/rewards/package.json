@@ -1,0 +1,29 @@
+{
+  "name": "@forge/rewards",
+  "version": "0.1.0",
+  "description": "FORGE built-in reward functions",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@forge/core": "0.1.0",
+    "@typescript-eslint/parser": "^8.35.1",
+    "ai": "^4.3.16",
+    "@ai-sdk/anthropic": "^1.2.12",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3"
+  }
+}
